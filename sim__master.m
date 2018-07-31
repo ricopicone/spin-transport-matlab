@@ -5,15 +5,18 @@ close all;
 global sim
 
 %% Choose simulation switch
+
 % sim = 'performed';  % experiment performed
 sim = 'rugar1';     % using Rugar's field B0 and gradient
 
 save_flag = 0;
 
 %% Physical constants
+
 physical_constants;
 
 %% Experimental parameters
+
 switch sim
     case 'performed'
         exp_params_performed;
@@ -22,9 +25,11 @@ switch sim
 end
 
 %% Normalized parameters
+
 normalized_params;
 
 %% Simulation parameters
+
 switch sim
     case 'performed'
         sim_params_performed;
@@ -33,11 +38,18 @@ switch sim
 end
 
 %% Grid
+
 grid_compute;
 
 %% Simulate
+
 n_traces = 20;
-simulate;
+sim_simulate;
+
+%% Postprocess
+
+postprocess;
 
 %% Plots and results
+
 plots_results;

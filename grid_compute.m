@@ -7,7 +7,7 @@ for i=1:nr
     rr(i)=(i-1)*dr - rmax;
 end
 
-u0=PiconeTwoSpeciesTransport_ic(rmax);
+u0=sim_ic(rmax);
 
 %% Normalized temporal grid
 %decim=10;  % decimate the time solutions
