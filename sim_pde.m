@@ -1,5 +1,5 @@
 % --------------------------------------------------------------
-function [cm,f,s] = PiconeTwoSpeciesTransport_pde(r,t,p,DpDx)
+function [cm,f,s] = sim_pde(r,t,p,DpDx)
 
 %---Constants and parameters
 global ii g G D c rho_3_langevin T1 mu_p mu_e B0 B_d kB temp T12 T13 freq duty rmax sim T

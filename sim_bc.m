@@ -1,5 +1,5 @@
 % --------------------------------------------------------------
-function [pl,ql,pr,qr] = PiconeTwoSpeciesTransport_bc(xl,ul,xr,ur,t)
+function [pl,ql,pr,qr] = sim_bc(xl,ul,xr,ur,t)
 global u0 c g G
 
 %---pinned

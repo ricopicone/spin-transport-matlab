@@ -1,5 +1,5 @@
 % --------------------------------------------------------------
-function u0 = PiconeTwoSpeciesTransport_ic(rr)
+function u0 = sim_ic(rr)
 
 global rho_1_langevin rho_2_langevin rho_3_langevin sim rmax
 

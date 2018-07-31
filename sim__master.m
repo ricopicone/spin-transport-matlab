@@ -8,36 +8,36 @@ global sim
 % sim = 'performed';  % experiment performed
 sim = 'rugar1';     % using Rugar's field B0 and gradient
 
-saveFlag = 0;
+save_flag = 0;
 
 %% Physical constants
-physicalConstants;
+physical_constants;
 
 %% Experimental parameters
 switch sim
     case 'performed'
-        expParametersPerformedExperiment;
+        exp_params_performed;
     case 'rugar1'
-        expParametersRugar;
+        exp_params_rugar;
 end
 
 %% Normalized parameters
-normalizedParameters;
+normalized_params;
 
 %% Simulation parameters
 switch sim
     case 'performed'
-        simParametersPerformedExperiment;
+        sim_params_performed;
     case 'rugar1'
-        simParametersRugar1;
+        sim_params_rugar;
 end
 
 %% Grid
-gridCompute;
+grid_compute;
 
 %% Simulate
-nTraces = 20;
+n_traces = 20;
 simulate;
 
 %% Plots and results
-plotsAndResults;
+plots_results;

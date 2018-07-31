@@ -25,11 +25,11 @@ axis vis3d
 
 
 grey = [ 0.5, 0.5, 0.5 ];
-C = linspecer(nTraces); 
-% C = zeros( nTraces, 3 );
-% for i = 1:nTraces % blue to red
-%     C(i,1) = ( i - 1 ) / ( nTraces - 1 );
-%     C(i,3) = ( nTraces - i ) / ( nTraces - 1 );
+C = linspecer(n_traces); 
+% C = zeros( n_traces, 3 );
+% for i = 1:n_traces % blue to red
+%     C(i,1) = ( i - 1 ) / ( n_traces - 1 );
+%     C(i,3) = ( n_traces - i ) / ( n_traces - 1 );
 % end
 
 lwidth = 1;
@@ -37,7 +37,7 @@ lwidth = 1;
 figure('Position',[1 scrsz(4) scrsz(3) 2/3*scrsz(4)])
 for i = 1:3
     subplot(2,3,i)
-    for j = 1:nTraces
+    for j = 1:n_traces
         switch sim
             case 'rugar1'
                 plot([rr(1),rr(end)],[0,0],'LineWidth',0.5,'Color',grey); hold on
@@ -50,7 +50,7 @@ for i = 1:3
 end
 for i = 1:3
     subplot(2,3,(i+3))
-    for j = 1:nTraces
+    for j = 1:n_traces
         switch sim
             case 'rugar1'
                 plot([rr(1),rr(end)],[0,0],'LineWidth',0.5,'Color',grey); hold on
@@ -68,7 +68,7 @@ end
 % colormap(C);
 % cbar = colorbar('North','XTickLabel',{'t = 0','t = 1'},'XMinorTick','off','XTick',[1,length(C)+1]);
 
-if saveFlag == 1
+if save_flag == 1
     switch sim
         case 'rugar1'
             matlab2tikz('figures/proposedTikz.tex','width','\figurewidth')
@@ -80,21 +80,21 @@ end
 %% lambda
 figure
 subplot(2,1,1)
-for j = 1:nTraces
+for j = 1:n_traces
     plot(rr, lambda(j,:), 'LineWidth', lwidth,'Color',C(j,:)); hold on
     xlim([-range,range]+edge+range);
     title('$$\lambda(\overline{t},\overline{r})$$','Interpreter','Latex')
     %xlabel('$$\overline{r} = \frac{\partial_r B|_{r = 0}}{B_d} r$$','Interpreter','Latex')
 end
 subplot(2,1,2)
-for j = 1:nTraces
+for j = 1:n_traces
     plot(rr, lambdaCum(j,:), 'LineWidth', lwidth,'Color',C(j,:)); hold on
     xlim([-range,range]+edge+range);
     title('$$\int_0^{\overline{t}}\lambda(\overline{t}^\prime,\overline{r}) d\overline{t}^\prime$$','Interpreter','Latex')
     xlabel('$$\overline{r} = \frac{\partial_r B|_{r = 0}}{B_d} r$$','Interpreter','Latex')
 end
 
-if saveFlag == 1
+if save_flag == 1
     switch sim
         case 'rugar1'
             matlab2tikz('figures/proposedlambdaTikz.tex','width','\figurewidth','height','\figureheight')
@@ -115,7 +115,7 @@ end
 saveAnimation = 0;
 nFrames = 60;
 grey = [ 0.5, 0.5, 0.5 ]; 
-indexVec2 = round(logspace(0,log10(length(t)),nFrames));
+index_vec2 = round(logspace(0,log10(length(t)),nFrames));
 C = linspecer(nFrames);
 
 lwidth = 1;
@@ -129,7 +129,7 @@ for j = 1:nFrames
                 case 'rugar1'
                     plot([rr(1),rr(end)],[0,0],'LineWidth',0.5,'Color',grey); hold on
             end
-            plot(rr, sol(indexVec2(j),:,i), 'LineWidth', lwidth,'Color',C(j,:)); hold on
+            plot(rr, sol(index_vec2(j),:,i), 'LineWidth', lwidth,'Color',C(j,:)); hold on
             xlim([-range,range]+edge+range);
             title(['$$\rho_',num2str(i),'$$'],'Interpreter','Latex')
             xlabel('$$\overline{r}$$','Interpreter','Latex')
@@ -141,7 +141,7 @@ for j = 1:nFrames
                 case 'rugar1'
                     plot([rr(1),rr(end)],[0,0],'LineWidth',0.5,'Color',grey); hold on
             end
-            plot(rr, solcurrent(indexVec2(j),:,i), 'LineWidth', lwidth,'Color',C(j,:)); hold on
+            plot(rr, solcurrent(index_vec2(j),:,i), 'LineWidth', lwidth,'Color',C(j,:)); hold on
             xlim([-range,range]+edge+range);
             title(['$$j_',num2str(i),'$$'],'Interpreter','Latex')
 %             xlabel('$$\overline{r} = \frac{\partial_r B|_{r = 0}}{B_d} r$$','Interpreter','Latex')
@@ -149,7 +149,7 @@ for j = 1:nFrames
             ylim(myLims(2,i,:))
     end
 
-    if ( ( saveFlag == 1 ) && ( saveAnimation == 1 ) )
+    if ( ( save_flag == 1 ) && ( saveAnimation == 1 ) )
         switch sim
             case 'rugar1'
                 matlab2tikz(['figures/proposedAnimationTikz',num2str(j),'.tex'],'width','\figurewidth')
