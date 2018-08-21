@@ -1,4 +1,4 @@
-global rho_1_langevin rho_2_langevin rho_3_langevin
+global rho_1_langevin rho_2_langevin rho_3_langevin rPFunc
 %---experimental parameters
 % Delta_2=    1.51324e29;
 % Delta_3=    8.55244e25;
@@ -35,9 +35,9 @@ T12 = tPFunc(T12sec);
 T13 = tPFunc(T13sec);
 
 %---Langevin
-rho_1_langevin= @(r)  ( 1 + gamma_e/gamma_p * Delta_3/Delta_2 ) * mu_p * B_d / ( kB * temp );    % langevin nuclear polarization
-rho_2_langevin= @(r)  tanh((B0-B_d*r)*mu_p/kB/temp);    % langevin nuclear polarization
-rho_3_langevin= @(r)  tanh((B0-B_d*r)*mu_e/kB/temp);    % langevin electron polarization
+% rho_1_langevin= @(r)  ( 1 + gamma_e/gamma_p * Delta_3/Delta_2 ) * mu_p * B_d / ( kB * temp );    % langevin nuclear polarization
+% rho_2_langevin= @(r)  tanh((B0-B_d*r)*mu_p/kB/temp);    % langevin nuclear polarization
+% rho_3_langevin= @(r)  tanh((B0-B_d*r)*mu_e/kB/temp);    % langevin electron polarization
 
 fprintf('\n');
 fprintf('Experimental Parameters\n');

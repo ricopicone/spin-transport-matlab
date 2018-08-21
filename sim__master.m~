@@ -8,7 +8,7 @@ global sim
 
 % sim = 'performed';  % experiment performed
 % sim = 'rugar1';     % using Rugar's field B0 and gradient
-sim = 'equilibrium';     % equilibrium ics
+sim = 'equilibrium';     % equilibrium 
 
 save_flag = 0;
 
@@ -24,7 +24,7 @@ switch sim
     case 'rugar1'
         exp_params_rugar;
     case 'equilibrium'
-        exp_params_rugar;
+        exp_params_performed;
 end
 
 %% Normalized parameters
@@ -39,12 +39,8 @@ switch sim
     case 'rugar1'
         sim_params_rugar;
     case 'equilibrium'
-        sim_params_rugar;
+        sim_params_performed;
 end
-
-%% Physical rules
-
-physical_rules;
 
 %% Grid
 

@@ -1,5 +1,5 @@
 %---simulation paramters
-Tsec =      1e0;                  % sec ... max simulation time
+Tsec =      1e-2;                  % sec ... max simulation time
 T =         tPFunc(Tsec); % dimensionless ... normalized max simulation time
 rmaxnm = 100;                   % nm
 rmax=rPFunc(rmaxnm*10^-9);        % dimensionless "rbar"
