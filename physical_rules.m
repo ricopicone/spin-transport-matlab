@@ -21,10 +21,10 @@ mu_e_kB = vpa(mu_e/kB);
 
 % Langevin (equilibrium solution)
 rho_1_langevin= @(r) double(precise_constant);    % langevin nuclear polarization
-rho_2_langevin= @(r)  tanh((B0-B_d*r)*mu_p_kB/temp);    % langevin nuclear polarization
-rho_3_langevin= @(r)  tanh((B0-B_d*r)*mu_e_kB/temp);    % langevin electron polarization
+rho_2_langevin= @(r) tanh((B0-B_d*r)*mu_p_kB/temp);    % langevin nuclear polarization
+rho_3_langevin= @(r) tanh((B0-B_d*r)*mu_e_kB/temp);    % langevin electron polarization
 
 % gradient of equilibrium solution
 d_rho_1_langevin= @(r) 0;
-d_rho_2_langevin= @(r)  double(-B_d*mu_p_kB/temp*(sech((B0-B_d*r)*mu_p_kB/temp))^2);
-d_rho_3_langevin= @(r)  double(-B_d*mu_e_kB/temp*(sech((B0-B_d*r)*mu_e_kB/temp))^2);
+d_rho_2_langevin= @(r) double(-B_d*mu_p_kB/temp*(sech((B0-B_d*r)*mu_p_kB/temp))^2);
+d_rho_3_langevin= @(r) double(-B_d*mu_e_kB/temp*(sech((B0-B_d*r)*mu_e_kB/temp))^2);
