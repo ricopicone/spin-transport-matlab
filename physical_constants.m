@@ -1,5 +1,5 @@
 %---physical constants
-global T ii g G D B_r c T1 rmax u0 T12 T13 mu_p mu_e B0 B_d kB temp freq duty
+global T ii g G D B_r c T1 rmax u0 T12 T13 mu_p mu_e B0 B_d kB temp freq duty  gamma_p gamma_e
 
 ge = -2.00231930436153;
 gp = 5.585694713;

@@ -1,4 +1,4 @@
-global rho_1_langevin rho_2_langevin rho_3_langevin rPFunc
+global rho_1_langevin rho_2_langevin rho_3_langevin rPFunc B1max T12 T13 T22 T23 Bd_2 Bd_3
 %---experimental parameters
 % Delta_2=    1.51324e29;
 % Delta_3=    8.55244e25;
@@ -26,6 +26,8 @@ B_d = (Bd_2 + Bd_3);  % Bd2 + Bd3
 %    B_d=        0.0000585733;       % T
 % B0=         0.0893;             % t
 B0=         2.7;             % t
+B1max_p_nom = 1e-3; % T ... TODO I made this up
+B1max_e_nom = 1e-3; % T ... TODO I made this up
 temp=       10;                 % K
 tPFunc = @(t) Gamma_2*(grad/B_d)^2*t;
 rPFunc = @(r) grad/B_d * r;
@@ -33,6 +35,10 @@ T12sec = 0.1;           % sec ... T1 proton
 T13sec = 30.3 * 10^-6;  % sec ... T1 electron
 T12 = tPFunc(T12sec);
 T13 = tPFunc(T13sec);
+T22sec = 20e-9; % sec ... T2 proton ... TODO made this up
+T23sec = 20e-9; % sec ... T2 electron ... TODO made this up
+T22 = tPFunc(T22sec);
+T23 = tPFunc(T23sec);
 
 %---Langevin
 % rho_1_langevin= @(r)  ( 1 + gamma_e/gamma_p * Delta_3/Delta_2 ) * mu_p * B_d / ( kB * temp );    % langevin nuclear polarization
