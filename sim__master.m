@@ -10,7 +10,7 @@ global sim
 % sim = 'rugar1';     % using Rugar's field B0 and gradient
 sim = 'equilibrium';     % equilibrium ics
 
-save_flag = 0;
+save_flag = 1;
 
 %% Physical constants
 

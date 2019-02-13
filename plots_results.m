@@ -74,7 +74,30 @@ if save_flag == 1
             matlab2tikz('figures/proposedTikz.tex','width','\figurewidth')
         case 'performed'
             matlab2tikz('figures/performedTikz.tex','width','\figurewidth')
+        case 'equilibrium'
+            matlab2tikz('figures/performedTikz.tex','width','\figurewidth')
     end
+end
+
+%% single rho plots
+
+figure
+for j = 1:n_traces
+    plot(rr, rho(j,:,2), 'LineWidth', lwidth,'Color',C(j,:)); hold on
+    xlim([-range,range]+edge+range);
+    title(['$$\rho_',num2str(2),'$$'],'Interpreter','Latex')
+end
+if save_flag == 1
+    matlab2tikz('figures/rho_2_snapshots.tex','width','\figurewidth')
+end
+figure
+for j = 1:n_traces
+    plot(rr, rho(j,:,3), 'LineWidth', lwidth,'Color',C(j,:)); hold on
+    xlim([-range,range]+edge+range);
+    title(['$$\rho_',num2str(3),'$$'],'Interpreter','Latex')
+end
+if save_flag == 1
+    matlab2tikz('figures/rho_3_snapshots.tex','width','\figurewidth')
 end
 
 %% lambda

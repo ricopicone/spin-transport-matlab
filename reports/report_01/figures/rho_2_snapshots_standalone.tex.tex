@@ -1,0 +1,46 @@
+% Created 2019-02-12 Tue 18:05
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Rico Picone}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={Rico Picone},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 26.1 (Org mode 9.1.9)}, 
+ pdflang={English}}
+\begin{document}
+
+\tableofcontents
+
+\%\%\% Local Variables:
+\%\%\% mode: latex
+\%\%\% \TeX{}-master: t
+\%\%\% End:
+
+\documentclass[tikz]{standalone}
+
+\pgfplotstableread{rlocus_01.txt}{\mytable}
+
+\begin{document}
+\small
+%%
+\input{rho_2_snapshots.tex}
+%%
+\end{document}
+\end{document}

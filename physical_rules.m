@@ -2,7 +2,7 @@
 global T ii g G D B_r c T1 rmax u0 T12 T13 mu_p mu_e B0 B_d kB temp freq duty rho_1_langevin rho_2_langevin rho_3_langevin  d_rho_1_langevin d_rho_2_langevin d_rho_3_langevin
 
 % precise constants to be used
-digits(50)
+% digits(50)
 precise_constant = vpa(...
     -1*... % I think this is because mag grad is negative
     tanh(...
@@ -16,13 +16,16 @@ precise_constant = vpa(...
     ) ...
 );
 
-mu_p_kB = vpa(mu_p/kB);
-mu_e_kB = vpa(mu_e/kB);
+% mu_p_kB = vpa(mu_p/kB);
+% mu_e_kB = vpa(mu_e/kB);
+mu_p_kB = mu_p/kB;
+mu_e_kB = mu_e/kB;
 
 % Langevin (equilibrium solution)
-rho_1_langevin= @(r) double(precise_constant);    % langevin nuclear polarization
-rho_2_langevin= @(r) tanh((B0-B_d*r)*mu_p_kB/temp);    % langevin nuclear polarization
-rho_3_langevin= @(r) tanh((B0-B_d*r)*mu_e_kB/temp);    % langevin electron polarization
+double_precise_constant = double(precise_constant);
+rho_1_langevin= @(r) double_precise_constant;    % langevin nuclear polarization
+rho_2_langevin= @(r) tanh((B0-B_d.*r).*mu_p_kB./temp);    % langevin nuclear polarization
+rho_3_langevin= @(r) tanh((B0-B_d.*r).*mu_e_kB./temp);    % langevin electron polarization
 
 % gradient of equilibrium solution
 d_rho_1_langevin= @(r) 0;
