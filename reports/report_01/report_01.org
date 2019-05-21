@@ -16,7 +16,7 @@
 #+OPTIONS: toc:nil
 
 #+begin_abstract
-A validation of the \emph{spin transport} software's diffusion behavior is developed and applied.
+A validation test of the \emph{spin transport} software's diffusion behavior is developed and applied.
 The validation successfully demonstrates proper diffusion and can now serve as a unit test for future simulation development.
 #+end_abstract
 

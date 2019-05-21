@@ -1,4 +1,4 @@
-% Created 2019-02-13 Wed 11:44
+% Created 2019-02-13 Wed 14:40
 % Intended LaTeX compiler: pdflatex
 \documentclass[onecolumn]{amsart}
 \usepackage[utf8]{inputenc}
@@ -35,19 +35,19 @@
 
 \maketitle
 \begin{abstract}
-A validation of the \emph{spin transport} software's diffusion behavior is developed and applied.
+A validation test of the \emph{spin transport} software's diffusion behavior is developed and applied.
 The validation successfully demonstrates proper diffusion and can now serve as a unit test for future simulation development.
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org50cf7cc}
+\label{sec:org54ab8da}
 The bulk spin transport equations include both \emph{diffusion} and \emph{separation} terms.
 The separation terms emerge from inter-species interaction through the dipole energy density.
 If the separation terms are excluded, the intra-species dynamics should be simply diffusive with known diffusion rates.
 For certain initial conditions, the distribution shapes that emerge from this diffusion are predictable and serve as good unit tests for simulation validation.
 
 \section{Gaussian diffusion}
-\label{sec:org96530b0}
+\label{sec:org05792ba}
 Excluding separative terms, the spin transport equation for each species's polarization (nuclear or electron) becomes\footnote{For simplicity, we are using \(\rho_i\) for either nuclear (\(i=2\)) or electron (\(i=3\)) polarization, \(\overline{r}\) for the dimensionless spatial coordinate, \(\overline{t}\) for dimensionless time, and \(\overline{\Gamma}_i\) for either species's dimensionless diffusion rate constant. By definition, \(\overline{\Gamma}_2 = 1\) and from the ratio for the simulation species, \(\overline{\Gamma}_3 = 22.335 \cdot 10^{3}\). See \cite{Picone2014b,Picone2019} for detailed variable definitions.}
 
 \begin{equation}
@@ -74,7 +74,7 @@ If we let the initial condition be a Dirac delta function \(f(\overline{r}) = \d
 So with an initial Dirac delta polarization distribution, the response of each polarization \(\rho_i\) should be Gaussian.
 
 \section{Simulation and fitting}
-\label{sec:org70efa3f}
+\label{sec:org795705d}
 In the following, the bulk transport equations are simulated with the \emph{spin transport} software \cite{Picone2019}.\footnote{The results that follow are from the MATLAB version of the software, given here: \url{https://github.com/ricopicone/spin-transport-matlab}.}
 The simulation is specifically for the transport equations without separative terms, à la \Cref{eq:diffusion}.
 Each nuclear and electron polarization initial conditions are defined to be narrow Gaussian distributions with peaks at unity polarization.
@@ -129,7 +129,7 @@ That is, the polarization should be Gaussian with variance \(\overline{\Gamma}_i
 The results are not only linear, their slopes are in agreement with the predicted slopes of \(\overline{\Gamma}_2 = 1\) and \(\overline{\Gamma}_3 = 22.3\cdot 10^3\).
 
 \section{Conclusions}
-\label{sec:orgece42eb}
+\label{sec:org6d61818}
 
 The simulation is in excellent agreement with the predicted linearity of the Gaussian variance through time.
 This validates that the simulation is operational in its diffusivity.
