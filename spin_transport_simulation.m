@@ -7,9 +7,14 @@ classdef spin_transport_simulation < handle % enables self-updating
     pde
     initial_conditions = @(self,rr) initial_conditions_equilibrium(self,rr); % set initial conditions method
     boundary_conditions = @(self,xl,ul,xr,ur,t) boundary_conditions_equilibrium_j(self,xl,ul,xr,ur,t); % set boundary conditions method
-    ode_solver_options = {};
-    simulation_parameters = {};
-    simulation_results = {};
+    ode_solver_options = struct( ...
+      'AbsTol',1e-12, ...
+      'RelTol',1e-6 ...
+    );
+    simulation_parameters = struct( ...
+    );
+    simulation_results = struct( ...
+    );
   end
   methods
     function self = spin_transport_simulation() % called at instance creation
