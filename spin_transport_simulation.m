@@ -19,97 +19,121 @@ classdef spin_transport_simulation < handle % enables self-updating
   methods
     function self = spin_transport_simulation() % called at instance creation
       self.class_definition = fileread([mfilename(),'.m']);
-      self.constants_set(self); 
-      self.parameters_set(self);
+      self.constants_set(self); % define constants
+      self.parameters_set(self); % define parameters
     end
     function self = constants_nominal(self)
-      self.constants.ge = -2.00231930436153;
-      self.constants.gp = 5.585694713;
-      self.constants.hb = 1.054571726e-34; % m^2 kg/sec
-      self.constants.gamma_e = 1.760859708e11; % nuclear gyromagnetic ratio, T^(-1) s^(-1)
-      self.constants.gamma_p = 2.675222005e8; % electron gyromagnetic ratio, T^(-1) s^(-1)
-      self.constants.mu = 4*pi*1e-7; % T m/A ... magnetic constant
-      self.constants.kB = 1.3806488e-23; % J/K ... Boltzmann constant
-      self.constants.NA = 6.02214129e23; % mol^-1 ... Avogadro constant
-      self.constants.mu_B = -self.constants.hb*self.constants.gamma_e/self.constants.ge; % Bohr magneton
-      self.constants.mu_e = -self.constants.hb*self.constants.gamma_e/2; % mag moment of electron spin
-      self.constants.mu_N = self.constants.hb*self.constants.gamma_p/self.constants.gp; % nuclear magneton
-      self.constants.mu_p = self.constants.hb*self.constants.gamma_p/2; % nuclear spin magnetic moment
+      c = self.constants; % unpack
+      c.ge = -2.00231930436153;
+      c.gp = 5.585694713;
+      c.hb = 1.054571726e-34; % m^2 kg/sec
+      c.gamma_e = 1.760859708e11; % nuclear gyromagnetic ratio, T^(-1) s^(-1)
+      c.gamma_p = 2.675222005e8; % electron gyromagnetic ratio, T^(-1) s^(-1)
+      c.mu = 4*pi*1e-7; % T m/A ... magnetic constant
+      c.kB = 1.3806488e-23; % J/K ... Boltzmann constant
+      c.NA = 6.02214129e23; % mol^-1 ... Avogadro constant
+      c.mu_B = -c.hb*c.gamma_e/c.ge; % Bohr magneton
+      c.mu_e = -c.hb*c.gamma_e/2; % mag moment of electron spin
+      c.mu_N = c.hb*c.gamma_p/c.gp; % nuclear magneton
+      c.mu_p = c.hb*c.gamma_p/2; % nuclear spin magnetic moment
+      self.constants = c; % repack
     end
     function self = parameters_nominal(self)
+      p = self.parameters; % unpack
       % system parameters
-      self.parameters.MwPS = 12*0 + 1*8;  %  no spin-1/2 from C atoms; H atoms
+      p.MwPS = 12*0 + 1*8;  %  no spin-1/2 from C atoms; H atoms
                           %  g/mol ... molar mass of polystyrene assuming C8H8 (Wikipedia)
-      self.parameters.dPS=1.047; % g/mL ... density of polystyrene (from bottle)
-      self.parameters.nAMPS = 2; % number of ^1H atoms per molecule for polystyrene
-      self.parameters.concDPPH = .01; % concentration DPPH
-      self.parameters.concPS = 1-self.parameters.concDPPH; % concentration polystyrene *)
-      self.parameters.den2 = 1/self.parameters.MwPS*self.parameters.dPS*1e6*self.constants.NA*self.parameters.nAMPS; % 1/m^3
-      self.parameters.Delta_2 = self.parameters.concPS*self.parameters.den2; % 1/m^3  \[Delta]2 -> 1.34*10^26 1/m^3, Dougherty2000 
-      self.parameters.MwDPPH = 394.32; % g/mol ... molar mass of DPPH (wikipedia)
-      self.parameters.dDPPH = 1.4; % g/cm^3 ... density of DPPH (wikipedia)
-      self.parameters.nAMDPPH = 1; % just one free radical per molecule
-      self.parameters.den3 = 1/self.parameters.MwDPPH*self.parameters.dDPPH*1e6*self.constants.NA*self.parameters.nAMDPPH; % 1/m^3
-      self.parameters.Delta_3 = self.parameters.concDPPH*self.parameters.den3; % 1/m^3
-      self.parameters.Gamma_2 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_p^2*self.parameters.Delta_2^(1/3); % rad/(sec Tesla)
-      self.parameters.Gamma_3 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_e^2*self.parameters.Delta_3^(1/3); % rad/(sec Tesla)
-      self.parameters.grad = 1e2*44000; % magnetic field gradient (T/m);
-      self.parameters.Bd_2 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_p*self.parameters.Delta_2;    % T 
-      self.parameters.Bd_3 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_e*self.parameters.Delta_3;    % T 
-      self.parameters.B_d = (self.parameters.Bd_2 + self.parameters.Bd_3);  % Bd2 + Bd3
-      self.parameters.B0 = 2.7; % T
-      self.parameters.B1max_p_nom = 1e-3; % T ... TODO I made this up
-      self.parameters.B1max_e_nom = 1e-3; % T ... TODO I made this up
-      self.parameters.temp = 10; % K
-      self.parameters.tPFunc = @(t) self.parameters.Gamma_2*(self.parameters.grad/self.parameters.B_d)^2*t;
-      self.parameters.rPFunc = @(r) self.parameters.grad/self.parameters.B_d*r;
-      self.parameters.T12sec = 0.1; % sec ... T1 proton
-      self.parameters.T13sec = 30.3 * 10^-6; % sec ... T1 electron
-      self.parameters.T12 = self.parameters.tPFunc(self.parameters.T12sec);
-      self.parameters.T13 = self.parameters.tPFunc(self.parameters.T13sec);
-      self.parameters.T22sec = 20e-9; % sec ... T2 proton ... TODO made this up
-      self.parameters.T23sec = 20e-9; % sec ... T2 electron ... TODO made this up
-      self.parameters.T22 = self.parameters.tPFunc(self.parameters.T22sec);
-      self.parameters.T23 = self.parameters.tPFunc(self.parameters.T23sec);
+      p.dPS=1.047; % g/mL ... density of polystyrene (from bottle)
+      p.nAMPS = 2; % number of ^1H atoms per molecule for polystyrene
+      p.concDPPH = .01; % concentration DPPH
+      p.concPS = 1-p.concDPPH; % concentration polystyrene *)
+      p.den2 = 1/p.MwPS*p.dPS*1e6*self.constants.NA*p.nAMPS; % 1/m^3
+      p.Delta_2 = p.concPS*p.den2; % 1/m^3  \[Delta]2 -> 1.34*10^26 1/m^3, Dougherty2000 
+      p.MwDPPH = 394.32; % g/mol ... molar mass of DPPH (wikipedia)
+      p.dDPPH = 1.4; % g/cm^3 ... density of DPPH (wikipedia)
+      p.nAMDPPH = 1; % just one free radical per molecule
+      p.den3 = 1/p.MwDPPH*p.dDPPH*1e6*self.constants.NA*p.nAMDPPH; % 1/m^3
+      p.Delta_3 = p.concDPPH*p.den3; % 1/m^3
+      p.Gamma_2 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_p^2*p.Delta_2^(1/3); % rad/(sec Tesla)
+      p.Gamma_3 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_e^2*p.Delta_3^(1/3); % rad/(sec Tesla)
+      p.grad = 1e2*44000; % magnetic field gradient (T/m);
+      p.Bd_2 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_p*p.Delta_2;    % T 
+      p.Bd_3 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_e*p.Delta_3;    % T 
+      p.B_d = (p.Bd_2 + p.Bd_3);  % Bd2 + Bd3
+      p.B0 = 2.7; % T
+      p.B1max_p_nom = 1e-3; % T ... TODO I made this up
+      p.B1max_e_nom = 1e-3; % T ... TODO I made this up
+      p.temp = 10; % K
+      p.tPFunc = @(t) p.Gamma_2*(p.grad/p.B_d)^2*t;
+      p.rPFunc = @(r) p.grad/p.B_d*r;
+      p.T12sec = 0.1; % sec ... T1 proton
+      p.T13sec = 30.3 * 10^-6; % sec ... T1 electron
+      p.T12 = p.tPFunc(p.T12sec);
+      p.T13 = p.tPFunc(p.T13sec);
+      p.T22sec = 20e-9; % sec ... T2 proton ... TODO made this up
+      p.T23sec = 20e-9; % sec ... T2 electron ... TODO made this up
+      p.T22 = p.tPFunc(p.T22sec);
+      p.T23 = p.tPFunc(p.T23sec);
       % dimensionless system parameters
-      self.parameters.g = self.constants.gamma_e/self.constants.gamma_p;    
-      self.parameters.G = self.parameters.Gamma_3/self.parameters.Gamma_2;    
-      self.parameters.D = self.parameters.Delta_3/self.parameters.Delta_2;    
-      self.parameters.B_r = 1;    
-      self.parameters.c = self.parameters.B_r*(1+self.parameters.D)/(1+self.parameters.g*self.parameters.D);
+      p.g = self.constants.gamma_e/self.constants.gamma_p;    
+      p.G = p.Gamma_3/p.Gamma_2;    
+      p.D = p.Delta_3/p.Delta_2;    
+      p.B_r = 1;    
+      p.c = p.B_r*(1+p.D)/(1+p.g*p.D);
       % simulation parameters
-      self.parameters.t_max_sec = 2e-9*self.parameters.G;
-      self.parameters.t_max = self.parameters.tPFunc(self.parameters.t_max_sec); % dimensionless ... normalized max simulation time
-      self.parameters.r_max_nm = 2; % nm
-      self.parameters.r_max = self.parameters.rPFunc(self.parameters.r_max_nm*1e-9); % dimensionless "rbar"
-      self.parameters.n_r = 400; % number of r spatial positions
-      self.parameters.n_r = 1000; % number of time incrments
-      self.parameters.pulse.n_p = 1; % number of proton pulses
-      self.parameters.pulse.n_e = 1; % number of electron pulses
-      self.parameters.pulse.duty_p = .1; % duty cycle of proton pulses
-      self.parameters.pulse.duty_e = .01; % duty cycle of electron pulses
-      self.parameters.pulse.on_B1_p = 0; % nuclear B1 on?
-      self.parameters.pulse.on_B1_e = 0; % electron B1 on?
-      self.parameters.pulse.B1_max_p = self.parameters.pulse.on_B1_p*self.parameters.B1max_p_nom;
-      self.parameters.pulse.B1_max_e = self.parameters.pulse.on_B1_e*self.parameters.B1max_e_nom;
-      self.parameters.pulse.T_p = self.parameters.t_max/self.parameters.pulse.n_p; % dimensionless ... period of proton pulses
-      self.parameters.pulse.freq_p = 1/self.parameters.pulse.T_p; % dimensionless ... frequency of proton pulses
-      self.parameters.pulse.T_s_p_nice = 1/(4*self.parameters.pulse.freq_p); % nice period of sinusoidal transition for B1 pulse
-      self.parameters.pulse.T_s_p = min([... % period of sinusoidal transition for B1 pulse
-        self.parameters.pulse.T_s_p_nice,...
-        2*self.parameters.pulse.duty_p/self.parameters.pulse.freq_p,...
-        2*(1-self.parameters.pulse.duty_p)/self.parameters.pulse.freq_p...
+      p.t_max_sec = 2e-9*p.G;
+      p.t_max = p.tPFunc(p.t_max_sec); % dimensionless ... normalized max simulation time
+      p.r_max_nm = 2; % nm
+      p.r_max = p.rPFunc(p.r_max_nm*1e-9); % dimensionless "rbar"
+      p.n_r = 400; % number of r spatial positions
+      p.n_r = 1000; % number of time incrments
+      p.pulse.n_p = 1; % number of proton pulses
+      p.pulse.n_e = 1; % number of electron pulses
+      p.pulse.duty_p = .1; % duty cycle of proton pulses
+      p.pulse.duty_e = .01; % duty cycle of electron pulses
+      p.pulse.on_B1_p = 0; % nuclear B1 on?
+      p.pulse.on_B1_e = 0; % electron B1 on?
+      p.pulse.B1_max_p = p.pulse.on_B1_p*p.B1max_p_nom;
+      p.pulse.B1_max_e = p.pulse.on_B1_e*p.B1max_e_nom;
+      p.pulse.T_p = p.t_max/p.pulse.n_p; % dimensionless ... period of proton pulses
+      p.pulse.freq_p = 1/p.pulse.T_p; % dimensionless ... frequency of proton pulses
+      p.pulse.T_s_p_nice = 1/(4*p.pulse.freq_p); % nice period of sinusoidal transition for B1 pulse
+      p.pulse.T_s_p = min([... % period of sinusoidal transition for B1 pulse
+        p.pulse.T_s_p_nice,...
+        2*p.pulse.duty_p/p.pulse.freq_p,...
+        2*(1-p.pulse.duty_p)/p.pulse.freq_p...
       ]); 
-      self.parameters.pulse.T_e = self.parameters.t_max/self.parameters.pulse.n_e; % dimensionless ... period of electron pulses
-      self.parameters.pulse.freq_e = 1/self.parameters.pulse.T_e; % dimensionless ... frequency of electron pulses
-      self.parameters.pulse.T_s_e_nice = 1/(4*self.parameters.pulse.freq_e); % nice period of sinusoidal transition for B1 pulse
-      self.parameters.pulse.T_s_e = min([... % period of sinusoidal transition for B1 pulse
-        self.parameters.pulse.T_s_e_nice,...
-        2*self.parameters.pulse.duty_e/self.parameters.pulse.freq_e,...
-        2*(1-self.parameters.pulse.duty_e)/self.parameters.pulse.freq_e...
+      p.pulse.T_e = p.t_max/p.pulse.n_e; % dimensionless ... period of electron pulses
+      p.pulse.freq_e = 1/p.pulse.T_e; % dimensionless ... frequency of electron pulses
+      p.pulse.T_s_e_nice = 1/(4*p.pulse.freq_e); % nice period of sinusoidal transition for B1 pulse
+      p.pulse.T_s_e = min([... % period of sinusoidal transition for B1 pulse
+        p.pulse.T_s_e_nice,...
+        2*p.pulse.duty_e/p.pulse.freq_e,...
+        2*(1-p.pulse.duty_e)/p.pulse.freq_e...
       ]); 
-      self.parameters.plot.range = 1*self.parameters.r_max/2; % position plot range
-      self.parameters.plot.edge = -1*self.parameters.r_max/2; % position plot offset
+      p.plot.range = 1*p.r_max/2; % position plot range
+      p.plot.edge = -1*p.r_max/2; % position plot offset
+      % langevin
+      mu_p_kB = self.constants.mu_p/self.constants.kB;
+      mu_e_kB = self.constants.mu_e/self.constants.kB;
+      p.rho_1_langevin= @(r) ... % langevin energy
+        -1*... % I think this is because mag grad is negative
+          tanh(...
+            (...
+                1 + self.constants.gamma_e/self.constants.gamma_p * p.Delta_3/p.Delta_2 ...
+            )/(self.constants.gamma_e/self.constants.gamma_p * ( 1 + p.Delta_3/p.Delta_2 ) ) * ...
+            (...
+              self.constants.mu_e * p.B_d / ...
+              self.constants.kB * p.temp ...
+            ) ...
+          );
+      p.rho_2_langevin= @(r) tanh((p.B0-p.B_d.*r).*mu_p_kB./p.temp);    % langevin nuclear polarization
+      p.rho_3_langevin= @(r) tanh((p.B0-p.B_d.*r).*mu_e_kB./p.temp);    % langevin electron polarization
+      % gradient of equilibrium solution (langevin)
+      p.d_rho_1_langevin= @(r) 0;
+      p.d_rho_2_langevin= @(r) double(-p.B_d*mu_p_kB/p.temp*(sech((p.B0-p.B_d*r)*mu_p_kB/p.temp))^2);
+      p.d_rho_3_langevin= @(r) double(-p.B_d*mu_e_kB/p.temp*(sech((p.B0-p.B_d*r)*mu_e_kB/p.temp))^2);
+      self.parameters = p; % repack
     end
     function u0 = initial_conditions_equilibrium(self,rr)
       u0 = [0;0;0];
@@ -123,12 +147,16 @@ classdef spin_transport_simulation < handle % enables self-updating
         ];
     end
     function [pl,ql,pr,qr] = boundary_conditions_equilibrium_j(self,xl,ul,xr,ur,t)
+      G = self.parameters.G;
       ql = [-1/(1+G);-1;-1/G];                                                         
       qr = [-1/(1+G);-1;-1/G];  
       pl = [d_rho_1_langevin(xl);d_rho_2_langevin(xl);d_rho_3_langevin(xl)];
       pr = [d_rho_1_langevin(xr);d_rho_2_langevin(xr);d_rho_3_langevin(xr)];
     end
     function [pl,ql,pr,qr] = boundary_conditions_zero_j(self,xl,ul,xr,ur,t)
+      G = self.parameters.G;
+      c = self.parameters.c;
+      g = self.parameters.g;
       pl = [0; -c*(1-ul(2)^2)*atanh(ul(1)); -c*G*g*(1-ul(3)^2)*atanh(ul(1))];                               
       ql = [-1;-1;-1];                                  
       pr = [0; -c*(1-ur(2)^2)*atanh(ur(1)); -c*G*g*(1-ur(3)^2)*atanh(ur(1))];                         
