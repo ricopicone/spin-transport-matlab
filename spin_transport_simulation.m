@@ -8,10 +8,7 @@ classdef spin_transport_simulation < handle % enables self-updating
     pde
     initial_conditions = @(self,rr) initial_conditions_equilibrium(self,rr); % set initial conditions method
     boundary_conditions = @(self,xl,ul,xr,ur,t) boundary_conditions_equilibrium_j(self,xl,ul,xr,ur,t); % set boundary conditions method
-    ode_solver_options = struct( ...
-      'AbsTol',1e-12, ...
-      'RelTol',1e-6 ...
-    );
+    ode_solver_options = struct('AbsTol',1e-12,'RelTol',1e-6);
     parameters = struct();
     parameters_set = @(self,rr) parameters_nominal(self); % set initial conditions method
     results = struct();
@@ -86,7 +83,7 @@ classdef spin_transport_simulation < handle % enables self-updating
       p.r_max_nm = 2; % nm
       p.r_max = p.rPFunc(p.r_max_nm*1e-9); % dimensionless "rbar"
       p.n_r = 400; % number of r spatial positions
-      p.n_r = 1000; % number of time incrments
+      p.n_r = 1000; % number of time increments
       p.pulse.n_p = 1; % number of proton pulses
       p.pulse.n_e = 1; % number of electron pulses
       p.pulse.duty_p = .1; % duty cycle of proton pulses
@@ -127,8 +124,8 @@ classdef spin_transport_simulation < handle % enables self-updating
               self.constants.kB * p.temp ...
             ) ...
           );
-      p.rho_2_langevin= @(r) tanh((p.B0-p.B_d.*r).*mu_p_kB./p.temp);    % langevin nuclear polarization
-      p.rho_3_langevin= @(r) tanh((p.B0-p.B_d.*r).*mu_e_kB./p.temp);    % langevin electron polarization
+      p.rho_2_langevin= @(r) tanh((p.B0-p.B_d.*r).*mu_p_kB./p.temp); % langevin nuclear polarization
+      p.rho_3_langevin= @(r) tanh((p.B0-p.B_d.*r).*mu_e_kB./p.temp); % langevin electron polarization
       % gradient of equilibrium solution (langevin)
       p.d_rho_1_langevin= @(r) 0;
       p.d_rho_2_langevin= @(r) double(-p.B_d*mu_p_kB/p.temp*(sech((p.B0-p.B_d*r)*mu_p_kB/p.temp))^2);
@@ -136,6 +133,7 @@ classdef spin_transport_simulation < handle % enables self-updating
       self.parameters = p; % repack
     end
     function u0 = initial_conditions_equilibrium(self,rr)
+      % just zeros!
       u0 = [0;0;0];
     end
     function u0 = initial_conditions_guassian(self,rr)
