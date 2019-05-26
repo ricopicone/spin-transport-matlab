@@ -58,7 +58,7 @@ classdef spin_transport_simulation < handle % enables self-updating
     function self = parameters_nominal(self)
       p = self.parameters; % unpack
       c = self.constants; % unpack
-      d = self.docs.parameters % unpack
+      d = self.docs.parameters; % unpack
       % system parameters
       p.MwPS = 12*0 + 1*8;  %  no spin-1/2 from C atoms; H atoms
                           %  g/mol ... molar mass of polystyrene assuming C8H8 (Wikipedia)
