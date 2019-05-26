@@ -57,6 +57,8 @@ classdef spin_transport_simulation < handle % enables self-updating
     end
     function self = parameters_nominal(self)
       p = self.parameters; % unpack
+      c = self.constants; % unpack
+      d = self.docs.parameters % unpack
       % system parameters
       p.MwPS = 12*0 + 1*8;  %  no spin-1/2 from C atoms; H atoms
                           %  g/mol ... molar mass of polystyrene assuming C8H8 (Wikipedia)
@@ -64,18 +66,18 @@ classdef spin_transport_simulation < handle % enables self-updating
       p.nAMPS = 2; % number of ^1H atoms per molecule for polystyrene
       p.concDPPH = .01; % concentration DPPH
       p.concPS = 1-p.concDPPH; % concentration polystyrene *)
-      p.den2 = 1/p.MwPS*p.dPS*1e6*self.constants.NA*p.nAMPS; % 1/m^3
+      p.den2 = 1/p.MwPS*p.dPS*1e6*c.NA*p.nAMPS; % 1/m^3
       p.Delta_2 = p.concPS*p.den2; % 1/m^3  \[Delta]2 -> 1.34*10^26 1/m^3, Dougherty2000 
       p.MwDPPH = 394.32; % g/mol ... molar mass of DPPH (wikipedia)
       p.dDPPH = 1.4; % g/cm^3 ... density of DPPH (wikipedia)
       p.nAMDPPH = 1; % just one free radical per molecule
-      p.den3 = 1/p.MwDPPH*p.dDPPH*1e6*self.constants.NA*p.nAMDPPH; % 1/m^3
+      p.den3 = 1/p.MwDPPH*p.dDPPH*1e6*c.NA*p.nAMDPPH; % 1/m^3
       p.Delta_3 = p.concDPPH*p.den3; % 1/m^3
-      p.Gamma_2 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_p^2*p.Delta_2^(1/3); % rad/(sec Tesla)
-      p.Gamma_3 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_e^2*p.Delta_3^(1/3); % rad/(sec Tesla)
+      p.Gamma_2 = c.mu/(4*pi)*c.hb*c.gamma_p^2*p.Delta_2^(1/3); % rad/(sec Tesla)
+      p.Gamma_3 = c.mu/(4*pi)*c.hb*c.gamma_e^2*p.Delta_3^(1/3); % rad/(sec Tesla)
       p.grad = 1e2*44000; % magnetic field gradient (T/m);
-      p.Bd_2 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_p*p.Delta_2;    % T 
-      p.Bd_3 = self.constants.mu/(4*pi)*self.constants.hb*self.constants.gamma_e*p.Delta_3;    % T 
+      p.Bd_2 = c.mu/(4*pi)*c.hb*c.gamma_p*p.Delta_2;    % T 
+      p.Bd_3 = c.mu/(4*pi)*c.hb*c.gamma_e*p.Delta_3;    % T 
       p.B_d = (p.Bd_2 + p.Bd_3);  % Bd2 + Bd3
       p.B0 = 2.7; % T
       p.B1max_p_nom = 1e-3; % T ... TODO I made this up
@@ -92,7 +94,7 @@ classdef spin_transport_simulation < handle % enables self-updating
       p.T22 = p.tPFunc(p.T22sec);
       p.T23 = p.tPFunc(p.T23sec);
       % dimensionless system parameters
-      p.g = self.constants.gamma_e/self.constants.gamma_p;    
+      p.g = c.gamma_e/c.gamma_p;    
       p.G = p.Gamma_3/p.Gamma_2;    
       p.D = p.Delta_3/p.Delta_2;    
       p.B_r = 1;    
@@ -131,17 +133,17 @@ classdef spin_transport_simulation < handle % enables self-updating
       p.plot.range = 1*p.r_max/2; % position plot range
       p.plot.edge = -1*p.r_max/2; % position plot offset
       % langevin
-      mu_p_kB = self.constants.mu_p/self.constants.kB;
-      mu_e_kB = self.constants.mu_e/self.constants.kB;
+      mu_p_kB = c.mu_p/c.kB;
+      mu_e_kB = c.mu_e/c.kB;
       p.rho_1_langevin= @(r) ... % langevin energy
         -1*... % I think this is because mag grad is negative
           tanh(...
             (...
-                1 + self.constants.gamma_e/self.constants.gamma_p * p.Delta_3/p.Delta_2 ...
-            )/(self.constants.gamma_e/self.constants.gamma_p * ( 1 + p.Delta_3/p.Delta_2 ) ) * ...
+                1 + c.gamma_e/c.gamma_p * p.Delta_3/p.Delta_2 ...
+            )/(c.gamma_e/c.gamma_p * ( 1 + p.Delta_3/p.Delta_2 ) ) * ...
             (...
-              self.constants.mu_e * p.B_d / ...
-              self.constants.kB * p.temp ...
+              c.mu_e * p.B_d / ...
+              c.kB * p.temp ...
             ) ...
           );
       p.rho_2_langevin= @(r) tanh((p.B0-p.B_d.*r).*mu_p_kB./p.temp); % langevin nuclear polarization
@@ -151,6 +153,7 @@ classdef spin_transport_simulation < handle % enables self-updating
       p.d_rho_2_langevin= @(r) double(-p.B_d*mu_p_kB/p.temp*(sech((p.B0-p.B_d*r)*mu_p_kB/p.temp))^2);
       p.d_rho_3_langevin= @(r) double(-p.B_d*mu_e_kB/p.temp*(sech((p.B0-p.B_d*r)*mu_e_kB/p.temp))^2);
       self.parameters = p; % repack
+      self.docs.parameters = d; % repack
     end
     function u0 = initial_conditions_equilibrium(self,rr)
       % just zeros!
