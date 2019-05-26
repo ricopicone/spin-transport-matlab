@@ -1,1 +1,1 @@
-# spin-transport-matlab
+./docs/README.md

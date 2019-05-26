@@ -12,6 +12,7 @@ classdef spin_transport_simulation < handle % enables self-updating
     parameters = struct();
     parameters_set = @(self,rr) parameters_nominal(self); % set initial conditions method
     results = struct();
+    docs = struct(); % Documentation of "sub-properties" of the class.
   end
   methods
     function self = spin_transport_simulation() % called at instance creation
@@ -24,6 +25,9 @@ classdef spin_transport_simulation < handle % enables self-updating
       c.ge = -2.00231930436153;
       c.gp = 5.585694713;
       c.hb = 1.054571726e-34; % m^2 kg/sec
+      self.docs.constants.hb = ['reduced Plancks constant\n'...
+        'units: m^2 kg/s\n'...
+        'source: https://en.wikipedia.org/wiki/Planck_constant#Value'];
       c.gamma_e = 1.760859708e11; % nuclear gyromagnetic ratio, T^(-1) s^(-1)
       c.gamma_p = 2.675222005e8; % electron gyromagnetic ratio, T^(-1) s^(-1)
       c.mu = 4*pi*1e-7; % T m/A ... magnetic constant
