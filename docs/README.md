@@ -1,11 +1,11 @@
 
-# spin-transport
+# `spin-transport`
 
 This repository contains the (developing) open-source code for simulating bulk spin transport (diffusion and separation) in solid media. Multi-spin-species simulations including magnetic resonance are in development.
 
 ## Installation
 
-## The spin_transport_simulation class
+## The `spin_transport_simulation` class
 
 ### Physical constants
 
