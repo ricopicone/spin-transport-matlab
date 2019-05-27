@@ -5,7 +5,7 @@ classdef spin_transport_simulation < handle % enables self-updating
     timestamp = datestr(now); % timestamp of class creation
     constants = struct(); % physical constants
     constants_set = @(self) constants_nominal(self); % set physical constants
-    pde
+    pde = @(self,r,t,p,DpDx) pde_nominal(self,r,t,p,DpDx) % pde to use in solution
     initial_conditions = @(self,rr) initial_conditions_equilibrium(self,rr); % set initial conditions method
     boundary_conditions = @(self,xl,ul,xr,ur,t) boundary_conditions_equilibrium_j(self,xl,ul,xr,ur,t); % set boundary conditions method
     ode_solver_options = struct('AbsTol',1e-12,'RelTol',1e-6);
@@ -194,6 +194,67 @@ classdef spin_transport_simulation < handle % enables self-updating
       ql = [0;0;0];
       pr = ur - [rho_1_langevin(xr);rho_2_langevin(xr);rho_3_langevin(xr)];
       qr = [0;0;0];  
+    end
+    function [cm,f,s] = pde_nominal(self,r,t,p,DpDx)
+      c = self.constants; % unpack
+      p = self.parameters; % unpack
+      cm = [1; 1; 1];                                  
+      f = [...
+        1+p.G; ...
+        1; ...
+        p.G ...
+      ].*DpDx;
+
+      % separation terms
+      % s = [...
+      %     -c^2/(1+D)*( (1-p(2)^2) + G*D*g^2*(1-p(3)^2) )*atanh(p(1))-c/(1+D)*(DpDx(2)-G*D*g*DpDx(3)); ...
+      %     c*( (1-p(2)^2)/(1-p(1)^2)*DpDx(1) - 2*atanh(p(1))*p(2)*DpDx(2) ); ...
+      %     -c*G*g*( (1-p(3)^2)/(1-p(1)^2)*DpDx(1) - 2*atanh(p(1))*p(3)*DpDx(3) ) ...
+      % ];  
+      s = [0;0;0]; % no cross terms
+
+      % Bloch dynamics sans relaxation
+      % - amplitude modulation
+      % w1_2 = -gamma_p*B1(t,freq_p,duty_p,T_s_p,B1max_p);
+      % w1_3 = -gamma_e*B1(t,freq_e,duty_e,T_s_e,B1max_e);
+      % - frequency modulation
+      % % delta_tilde_2 = gamma_p*Bd_2*(r-rs);
+      % % delta_tilde_3 = gamma_e*Bd_3*(r-rs);
+      % delta_tilde_2 = gamma_p*Bd_2*r;
+      % delta_tilde_3 = gamma_e*Bd_3*r;
+      % - modulation enters through the taus
+      % tau_2 = 1/(1/T12+T22*w1_2^2/(1+T22^2*delta_tilde_2^2));
+      % tau_3 = 1/(1/T13+T23*w1_3^2/(1+T23^2*delta_tilde_3^2));
+      % s = s + [ ...
+      %     0; ...
+      %     -p(2)/tau_2; ...
+      %     -p(3)/tau_3 ...
+      % ];
+
+      % Bloch relaxation dynamics <--this slows the solver
+      % s = s + [ ...
+      %     0; ...
+      %     rho_2_langevin(r)/T12; ...
+      %     rho_3_langevin(r)/T13 ...
+      % ];
+
+      % print
+      ii = ii+1;
+      if mod(ii,10000)==0
+          fprintf('%d  %g\n',ii,t)
+      end
+    end
+    function [cm,f,s] = pde_diffusion(self,r,t,p,DpDx)
+    % PDE_DIFFUSION  pde for diffusion unit test
+      c = self.constants; % unpack
+      p = self.parameters; % unpack
+      cm = [1; 1; 1];                                  
+      f = [...
+        1+p.G; ...
+        1; ...
+        p.G ...
+      ].*DpDx;
+      s = [0;0;0]; % no cross terms
     end
   end
 end
