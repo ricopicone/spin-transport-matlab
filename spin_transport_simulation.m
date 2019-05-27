@@ -11,7 +11,9 @@ classdef spin_transport_simulation < handle % enables self-updating
     ode_solver_options = struct('AbsTol',1e-12,'RelTol',1e-6);
     parameters = struct();
     parameters_set = @(self,rr) parameters_nominal(self); % set initial conditions method
-    results = struct();
+    grid_spatial
+    grid_temporal
+    results = [];
     docs = struct(); % Documentation of "sub-properties" of the class.
   end
   methods
@@ -21,6 +23,11 @@ classdef spin_transport_simulation < handle % enables self-updating
       self.class_definition = fileread([mfilename(),'.m']);
       self.constants_set(self); % define constants
       self.parameters_set(self); % define parameters
+    end
+    function self = wipe_results(self)
+      % WIPE_RESULTS  empties results property
+      %   this is important to do whenever most properties change
+      self.results = [];
     end
     function self = constants_nominal(self)
       c = self.constants; % unpack
@@ -100,6 +107,7 @@ classdef spin_transport_simulation < handle % enables self-updating
       p.B_r = 1;    
       p.c = p.B_r*(1+p.D)/(1+p.g*p.D);
       % simulation parameters
+      p.n_traces = 20;
       p.t_max_sec = 2e-9*p.G;
       p.t_max = p.tPFunc(p.t_max_sec); % dimensionless ... normalized max simulation time
       p.r_max_nm = 2; % nm
@@ -256,17 +264,34 @@ classdef spin_transport_simulation < handle % enables self-updating
       ].*DpDx;
       s = [0;0;0]; % no cross terms
     end
-    function out = simulate(self)
+    function self = grid_compute(self)
+      % GRID_COMPUTE  computes grid_spatial and grid_temporal
+      p = self.parameters; % unpack
+      % spatial grid
+      if mod(p.nr,2)  == 0 % makes odd nr
+        p.nr = p.nr + 1;
+      end
+      dr=2*p.rmax/(p.nr-1);
+      for i=1:p.nr
+        self.grid_spatial(i)=(i-1)*dr - p.rmax;
+      end
+      % u0=self.initial_conditions(self,p.rmax);
+      % normalized temporal grid
+      %decim=10;  % decimate the time solutions
+      dt = p.T/(p.nt-1);
+      self.grid_temporal = 0:dt:p.T;
+    end
+    function self = simulate(self)
       % SIMULATE  method that actually calls pdepe
       % index_vec = floor(logspace(0,log10(length(t)),n_traces));
       % ii=0; % for printing sim progress
-      sol = pdepe(...
-        m, ...
+      self.results = pdepe(...
+        0, ... % symmetry of the problem is "slab"
         self.pde, ...
         self.initial_conditions, ...
         self.boundary_conditions, ...
-        rr, ...
-        t, ...
+        self.grid_spatial, ...
+        self.grid_temporal, ...
         self.ode_solver_options...
       );
     end
