@@ -14,7 +14,7 @@ classdef spin_transport_simulation < handle % enables self-updating
     ode_solver_options = struct('AbsTol',1e-12,'RelTol',1e-6);
     grid_spatial
     grid_temporal
-    results = [];
+    results = struct();
   end
   methods
     function self = spin_transport_simulation() % called at instance creation
@@ -69,7 +69,7 @@ classdef spin_transport_simulation < handle % enables self-updating
     function self = wipe_results(self)
       % WIPE_RESULTS  empties results property
       %   this is important to do whenever most properties change
-      self.results = [];
+      self.results = struct();
     end
     function self = constants_nominal(self)
       c = self.constants; % unpack
@@ -313,21 +313,23 @@ classdef spin_transport_simulation < handle % enables self-updating
       if mod(p.nr,2)  == 0 % makes odd nr
         p.nr = p.nr + 1;
       end
-      dr=2*p.rmax/(p.nr-1);
+      self.parameters.dr=2*p.rmax/(p.nr-1);
       for i=1:p.nr
         self.grid_spatial(i)=(i-1)*dr - p.rmax;
       end
       % u0=self.initial_conditions(self,p.rmax);
       % normalized temporal grid
       %decim=10;  % decimate the time solutions
-      dt = p.T/(p.nt-1);
+      self.parameters.dt = p.T/(p.nt-1);
       self.grid_temporal = 0:dt:p.T;
+      % decimated time indices
+      self.parameters.index_vec = ...
+        floor(logspace(0,log10(length(self.grid_temporal)),self.parameters.n_traces));
     end
     function self = simulate(self)
       % SIMULATE  method that actually calls pdepe
-      % index_vec = floor(logspace(0,log10(length(t)),n_traces));
       % ii=0; % for printing sim progress
-      self.results = pdepe(...
+      self.results.raw = pdepe(...
         0, ... % symmetry of the problem is "slab"
         self.pde, ...
         self.initial_conditions, ...
@@ -336,6 +338,40 @@ classdef spin_transport_simulation < handle % enables self-updating
         self.grid_temporal, ...
         self.ode_solver_options...
       );
+    end
+    function self = postprocess(self)
+      r = self.results; % unpack
+      p = self.parameters; % unpack
+      % time decimated
+      r.tdec = self.grid_temporal(p.index_vec);
+      % rho decimated
+      r.rho_1 = r.raw(p.index_vec,:,1);  
+      r.rho_2 = r.raw(p.index_vec,:,2);  
+      r.rho_3 = r.raw(p.index_vec,:,3);
+      r.rho = r.raw(index_vec,:,:);
+      % omega decimated
+      r.omega_1 = -(Delta_2+Delta_3)/Delta_2*atanh(r.raw(p.index_vec,:,1));  
+      r.omega_2 = -Delta_2/Delta_2*atanh(r.raw(p.index_vec,:,2));  
+      r.omega_3 = -Delta_3/Delta_2*atanh(r.raw(p.index_vec,:,3));
+      % current decimated
+      dtsol = zeros(size(r.raw));
+      drsol = zeros(size(r.raw));
+      for i = 1:3
+          [drsol(:,:,i), dtsol(:,:,i)] = ...
+            gradient(r.raw(:,:,i), p.dr, p.dt);
+      end
+      solcurrent = zeros(size(r.raw));
+      solcurrent(:,:,1) = -(1+p.G).*drsol(:,:,1);
+      solcurrent(:,:,2) = -p.c.*( 1 - r.raw(:,:,2).^2 ).* atanh(r.raw(:,:,1)) - drsol(:,:,2);
+      solcurrent(:,:,3) = p.G.* ( p.g*p.c.*( 1 - r.raw(:,:,3).^2 ).* atanh(r.raw(:,:,1)) - drsol(:,:,3) );
+      r.current = solcurrent(p.index_vec,:,:);
+      % lambda (dynamic figure of merit) decimated
+      kappa = -p.c.* ( 1 - r.raw(:,:,2).^2 ).* atanh( r.raw(:,:,1) ); % kappa really only defined in the steady state
+      [lambdaFull, dtkappaFull] = gradient(kappa, p.dr, p.dt);
+      r.lambda = lambdaFull(index_vec,:,:);
+      % lambda cumulative decimated
+      lambdaFullCum = dt*cumtrapz(lambdaFull);
+      r.lambdaCum = lambdaFullCum(p.index_vec,:);
     end
   end
 end
