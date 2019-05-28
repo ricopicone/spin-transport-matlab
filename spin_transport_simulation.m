@@ -3,18 +3,18 @@ classdef spin_transport_simulation < handle % enables self-updating
     class_version = 0.1; % float for easy version comparison
     class_definition % to save a copy of this classdef file for comparison of serialized instances
     timestamp = datestr(now); % timestamp of class creation
+    docs = struct(); % Documentation of "sub-properties" of the class.
     constants = struct(); % physical constants
     constants_set = @(self) constants_nominal(self); % set physical constants
+    parameters = struct();
+    parameters_set = @(self,rr) parameters_nominal(self); % set initial conditions method
     pde = @(self,r,t,p,DpDx) pde_nominal(self,r,t,p,DpDx) % pde to use in solution
     initial_conditions = @(self,rr) initial_conditions_equilibrium(self,rr); % set initial conditions method
     boundary_conditions = @(self,xl,ul,xr,ur,t) boundary_conditions_equilibrium_j(self,xl,ul,xr,ur,t); % set boundary conditions method
     ode_solver_options = struct('AbsTol',1e-12,'RelTol',1e-6);
-    parameters = struct();
-    parameters_set = @(self,rr) parameters_nominal(self); % set initial conditions method
     grid_spatial
     grid_temporal
     results = [];
-    docs = struct(); % Documentation of "sub-properties" of the class.
   end
   methods
     function self = spin_transport_simulation() % called at instance creation
@@ -23,6 +23,48 @@ classdef spin_transport_simulation < handle % enables self-updating
       self.class_definition = fileread([mfilename(),'.m']);
       self.constants_set(self); % define constants
       self.parameters_set(self); % define parameters
+    end
+    function set.constants(self, new)
+      self.constants = new;
+      self.wipe_results(); % wipe results
+    end
+    function set.constants_set(self, new)
+      self.constants_set = new;
+      self.constants_set(self); % update constants
+      self.wipe_results(); % wipe results
+    end
+    function set.parameters(self, new)
+      self.parameters = new;
+      self.wipe_results(); % wipe results
+    end
+    function set.parameters_set(self, new)
+      self.parameters_set = new;
+      self.parameters_set(self); % update parameters
+      self.wipe_results(); % wipe results
+    end
+    function set.pde(self, new)
+      self.pde = new;
+      self.wipe_results(); % wipe results
+    end
+    function set.initial_conditions(self, new)
+      self.initial_conditions = new;
+      self.wipe_results(); % wipe results
+    end
+    function set.boundary_conditions(self, new)
+      self.boundary_conditions = new;
+      self.wipe_results(); % wipe results
+    end
+    function set.ode_solver_options(self, new)
+      self.ode_solver_options = new;
+      self.wipe_results(); % wipe results
+    end
+    function set.grid_spatial(self, new)
+      self.grid_spatial = new;
+      self.wipe_results(); % wipe results
+    end
+    function set.grid_temporal(self, new)
+      self.grid_temporal = new;
+      self.wipe_results(); % wipe results
     end
     function self = wipe_results(self)
       % WIPE_RESULTS  empties results property
