@@ -10,7 +10,7 @@ classdef spin_transport_simulation < handle % enables self-updating
     parameters_set = @(self,rr) parameters_nominal(self); % set initial conditions method
     pde = @(self,r,t,p,DpDx) pde_nominal(self,r,t,p,DpDx) % pde to use in solution
     initial_conditions = @(self,rr) initial_conditions_equilibrium(self,rr); % set initial conditions method
-    boundary_conditions = @(self,xl,ul,xr,ur,t) boundary_conditions_equilibrium_j(self,xl,ul,xr,ur,t); % set boundary conditions method
+    boundary_conditions = @(self,xl,ul,xr,ur,t) boundary_conditions_zero_j(self,xl,ul,xr,ur,t); % set boundary conditions method
     ode_solver_options = struct('AbsTol',1e-12,'RelTol',1e-6);
     grid_spatial
     grid_temporal
@@ -23,6 +23,7 @@ classdef spin_transport_simulation < handle % enables self-updating
       self.class_definition = fileread([mfilename(),'.m']);
       self.constants_set(self); % define constants
       self.parameters_set(self); % define parameters
+      self.grid_compute(); % compute grids
     end
     function set.constants(self, new)
       self.constants = new;
@@ -154,8 +155,8 @@ classdef spin_transport_simulation < handle % enables self-updating
       p.t_max = p.tPFunc(p.t_max_sec); % dimensionless ... normalized max simulation time
       p.r_max_nm = 2; % nm
       p.r_max = p.rPFunc(p.r_max_nm*1e-9); % dimensionless "rbar"
-      p.n_r = 400; % number of r spatial positions
-      p.n_r = 1000; % number of time increments
+      p.nr = 400; % number of r spatial positions
+      p.nt = 1000; % number of time increments
       p.pulse.n_p = 1; % number of proton pulses
       p.pulse.n_e = 1; % number of electron pulses
       p.pulse.duty_p = .1; % duty cycle of proton pulses
@@ -289,10 +290,10 @@ classdef spin_transport_simulation < handle % enables self-updating
       % ];
 
       % print
-      ii = ii+1;
-      if mod(ii,10000)==0
-          fprintf('%d  %g\n',ii,t)
-      end
+      % ii = ii+1;
+      % if mod(ii,10000)==0
+      %     fprintf('%d  %g\n',ii,t)
+      % end
     end
     function [cm,f,s] = pde_diffusion(self,r,t,p,DpDx)
     % PDE_DIFFUSION  pde for diffusion unit test
@@ -313,15 +314,15 @@ classdef spin_transport_simulation < handle % enables self-updating
       if mod(p.nr,2)  == 0 % makes odd nr
         p.nr = p.nr + 1;
       end
-      self.parameters.dr=2*p.rmax/(p.nr-1);
+      self.parameters.dr=2*p.r_max/(p.nr-1);
       for i=1:p.nr
-        self.grid_spatial(i)=(i-1)*dr - p.rmax;
+        self.grid_spatial(i)=(i-1)*self.parameters.dr - p.r_max;
       end
-      % u0=self.initial_conditions(self,p.rmax);
+      % u0=self.initial_conditions(self,p.r_max);
       % normalized temporal grid
       %decim=10;  % decimate the time solutions
-      self.parameters.dt = p.T/(p.nt-1);
-      self.grid_temporal = 0:dt:p.T;
+      self.parameters.dt = p.t_max/(p.nt-1);
+      self.grid_temporal = 0:self.parameters.dt:p.t_max;
       % decimated time indices
       self.parameters.index_vec = ...
         floor(logspace(0,log10(length(self.grid_temporal)),self.parameters.n_traces));
@@ -331,9 +332,9 @@ classdef spin_transport_simulation < handle % enables self-updating
       % ii=0; % for printing sim progress
       self.results.raw = pdepe(...
         0, ... % symmetry of the problem is "slab"
-        self.pde, ...
-        self.initial_conditions, ...
-        self.boundary_conditions, ...
+        @(r,t,p,DpDx) self.pde(self,r,t,p,DpDx), ...
+        @(r) self.initial_conditions(self,r), ...
+        @(xl,ul,xr,ur,t) self.boundary_conditions(self,xl,ul,xr,ur,t), ...
         self.grid_spatial, ...
         self.grid_temporal, ...
         self.ode_solver_options...
