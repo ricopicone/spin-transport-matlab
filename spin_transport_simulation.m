@@ -210,7 +210,7 @@ classdef spin_transport_simulation < handle % enables self-updating
       % just zeros!
       u0 = [0;0;0];
     end
-    function u0 = initial_conditions_guassian(self,rr)
+    function u0 = initial_conditions_gaussian(self,rr)
       u0 = ...
         [...
           0; ...
@@ -349,11 +349,11 @@ classdef spin_transport_simulation < handle % enables self-updating
       r.rho_1 = r.raw(p.index_vec,:,1);  
       r.rho_2 = r.raw(p.index_vec,:,2);  
       r.rho_3 = r.raw(p.index_vec,:,3);
-      r.rho = r.raw(index_vec,:,:);
+      r.rho = r.raw(p.index_vec,:,:);
       % omega decimated
-      r.omega_1 = -(Delta_2+Delta_3)/Delta_2*atanh(r.raw(p.index_vec,:,1));  
-      r.omega_2 = -Delta_2/Delta_2*atanh(r.raw(p.index_vec,:,2));  
-      r.omega_3 = -Delta_3/Delta_2*atanh(r.raw(p.index_vec,:,3));
+      r.omega_1 = -(p.Delta_2+p.Delta_3)/p.Delta_2*atanh(r.raw(p.index_vec,:,1));  
+      r.omega_2 = -p.Delta_2/p.Delta_2*atanh(r.raw(p.index_vec,:,2));  
+      r.omega_3 = -p.Delta_3/p.Delta_2*atanh(r.raw(p.index_vec,:,3));
       % current decimated
       dtsol = zeros(size(r.raw));
       drsol = zeros(size(r.raw));
@@ -369,10 +369,11 @@ classdef spin_transport_simulation < handle % enables self-updating
       % lambda (dynamic figure of merit) decimated
       kappa = -p.c.* ( 1 - r.raw(:,:,2).^2 ).* atanh( r.raw(:,:,1) ); % kappa really only defined in the steady state
       [lambdaFull, dtkappaFull] = gradient(kappa, p.dr, p.dt);
-      r.lambda = lambdaFull(index_vec,:,:);
+      r.lambda = lambdaFull(p.index_vec,:,:);
       % lambda cumulative decimated
-      lambdaFullCum = dt*cumtrapz(lambdaFull);
+      lambdaFullCum = p.dt*cumtrapz(lambdaFull);
       r.lambdaCum = lambdaFullCum(p.index_vec,:);
+      self.results = r; % repack
     end
     function self = unit_test_gauss(self)
       % UNIT_TEST_GAUSS this definitely doesn't work yet
